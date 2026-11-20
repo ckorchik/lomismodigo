@@ -38,6 +38,7 @@ HTML, CSS y JavaScript sin frameworks ni build. Firebase se carga por CDN (v10.1
 
 ## Reglas del juego (modo Clásico)
 
+- Se juega con **3 jugadores como mínimo**.
 - Una partida tiene **2 rondas de 3 categorías** (6 temas en total).
 - En cada categoría, cada jugador escribe **6 palabras** sobre el tema. No puede repetir palabras en su propia lista.
 - **Puntaje:** cada palabra suma tantos puntos como jugadores la escribieron. Si nadie más la escribió, vale 0. Se aceptan plurales, tildes y sinónimos, pero no subcategorías.
@@ -72,7 +73,7 @@ HTML, CSS y JavaScript sin frameworks ni build. Firebase se carga por CDN (v10.1
 2. En GitHub Desktop: escribir un Summary, Commit to main y después Push origin. GitHub Pages se actualiza en uno o dos minutos.
 3. Actualizar este archivo en el mismo commit.
 
-Para probar en local: VS Code → Go Live, y una ventana de incógnito como segundo jugador.
+Para probar en local: VS Code → Go Live, y ventanas de incógnito o de otro navegador para los demás jugadores (se necesitan 3).
 
 ## Pendientes y decisiones abiertas
 
@@ -85,3 +86,4 @@ Para probar en local: VS Code → Go Live, y una ventana de incógnito como segu
 
 - **v1 (2026-11-20):** primera versión del modo Clásico: salas con código, clave del equipo, revisión con "Yo también", tablas por categoría, ranking final, histórico y panel de admin.
 - **v2 (2026-11-20):** ajustes de sala (por tiempo y categoría por turnos), palabras protegidas hasta el cierre, objeciones con penalidad por trampa, almas gemelas y bloqueo de palabras repetidas. Requiere las reglas nuevas.
+- **v2.1 (2026-11-20):** mínimo de 3 jugadores para empezar la partida.

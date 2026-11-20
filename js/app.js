@@ -7,7 +7,7 @@ import { calcularCategoria, almasGemelas, repetidas, PENALIDAD_TRAMPA } from "./
 const RONDAS = 2;
 const CATS_POR_RONDA = 3;
 const TOTAL_CATS = RONDAS * CATS_POR_RONDA;
-const MIN_JUGADORES = 2;
+const MIN_JUGADORES = 3;
 const AJUSTES_BASE = { fin: "todos", minutos: 2, eleccion: "anfitrion" };
 
 const MODOS = [
