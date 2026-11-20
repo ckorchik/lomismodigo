@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Unánime · Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilos.css">
+  <style>
+    #app { max-width: 960px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+    .stat { background: var(--blanco); border: var(--borde); border-radius: 16px; padding: 14px 16px; box-shadow: 4px 4px 0 var(--tinta); }
+    .stat b { display: block; font-family: "Bricolage Grotesque", sans-serif; font-size: 2.2rem; }
+    .scroll { overflow-x: auto; }
+    .id { font-family: ui-monospace, monospace; font-size: .8rem; color: var(--suave); }
+  </style>
+</head>
+<body>
+  <main id="app"><p class="muted">Cargando…</p></main>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

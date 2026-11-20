@@ -1,0 +1,44 @@
+{
+  "rules": {
+    "claves": { ".read": false, ".write": false },
+    "miembros": {
+      ".read": "auth != null && auth.token.email == 'TU_MAIL_ADMIN' && auth.token.email_verified == true",
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid",
+        ".validate": "newData.hasChildren(['clave', 'nombre']) && root.child('claves').child(newData.child('clave').val() + '').exists()"
+      }
+    },
+    "salas": {
+      "$c": {
+        ".read": "auth != null && (root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists() || (auth.token.email == 'TU_MAIL_ADMIN' && auth.token.email_verified == true))",
+        ".write": "auth != null && root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists() && ((!data.exists() && newData.child('anfitrion').val() == auth.uid) || data.child('anfitrion').val() == auth.uid)",
+        "jugadores": {
+          "$uid": {
+            ".write": "auth != null && auth.uid == $uid && root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists()"
+          }
+        },
+        "cats": {
+          "$i": {
+            "respuestas": {
+              "$uid": {
+                ".write": "auth != null && auth.uid == $uid && root.child('salas/' + $c + '/estado').val() == 'escribiendo' && root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists()"
+              }
+            },
+            "vinculos": {
+              "$uid": {
+                ".write": "auth != null && auth.uid == $uid && root.child('salas/' + $c + '/estado').val() == 'revision' && root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists()"
+              }
+            }
+          }
+        }
+      }
+    },
+    "historial": {
+      ".read": "auth != null && auth.token.email == 'TU_MAIL_ADMIN' && auth.token.email_verified == true",
+      "$id": {
+        ".write": "auth != null && !data.exists() && root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists()"
+      }
+    }
+  }
+}
