@@ -1,8 +1,11 @@
 {
   "rules": {
-    "claves": { ".read": false, ".write": false },
+    "claves": {
+      ".read": false,
+      ".write": false
+    },
     "miembros": {
-      ".read": "auth != null && auth.token.email == 'TU_MAIL_ADMIN' && auth.token.email_verified == true",
+      ".read": "auth != null && (auth.token.email == 'TU_MAIL_ADMIN' && auth.token.email_verified == true)",
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
         ".write": "auth != null && auth.uid == $uid",
@@ -20,7 +23,7 @@
         },
         "cats": {
           "$i": {
-            "respuestas": {
+            "listos": {
               "$uid": {
                 ".write": "auth != null && auth.uid == $uid && root.child('salas/' + $c + '/estado').val() == 'escribiendo' && root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists()"
               }
@@ -29,13 +32,38 @@
               "$uid": {
                 ".write": "auth != null && auth.uid == $uid && root.child('salas/' + $c + '/estado').val() == 'revision' && root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists()"
               }
+            },
+            "objeciones": {
+              "$k": {
+                "$uid": {
+                  ".write": "auth != null && auth.uid == $uid && root.child('salas/' + $c + '/estado').val() == 'revision' && root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists()"
+                }
+              }
+            },
+            "propuesta": {
+              "$uid": {
+                ".write": "auth != null && auth.uid == $uid && root.child('salas/' + $c + '/estado').val() == 'tema' && root.child('salas/' + $c + '/cats/' + $i + '/proponente').val() == auth.uid && root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists()"
+              }
+            }
+          }
+        }
+      }
+    },
+    "respuestas": {
+      "$c": {
+        "$p": {
+          "$i": {
+            ".read": "auth != null && (root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists() || (auth.token.email == 'TU_MAIL_ADMIN' && auth.token.email_verified == true)) && !(root.child('salas/' + $c + '/estado').val() == 'escribiendo' && root.child('salas/' + $c + '/catKey').val() == $i && root.child('salas/' + $c + '/partida').val() == $p)",
+            "$uid": {
+              ".read": "auth != null && auth.uid == $uid",
+              ".write": "auth != null && auth.uid == $uid && root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists() && root.child('salas/' + $c + '/estado').val() == 'escribiendo' && root.child('salas/' + $c + '/catKey').val() == $i && root.child('salas/' + $c + '/partida').val() == $p"
             }
           }
         }
       }
     },
     "historial": {
-      ".read": "auth != null && auth.token.email == 'TU_MAIL_ADMIN' && auth.token.email_verified == true",
+      ".read": "auth != null && (auth.token.email == 'TU_MAIL_ADMIN' && auth.token.email_verified == true)",
       "$id": {
         ".write": "auth != null && !data.exists() && root.child('claves').child(root.child('miembros/' + auth.uid + '/clave').val() + '').exists()"
       }

@@ -44,7 +44,9 @@ async function cargar(user) {
     const js = Object.values(p.jugadores || {}).sort((a, b) => b.total - a.total);
     return `<tr><td>${fecha(p.fecha)}<br><span class="id">Sala ${esc(p.sala)}</span></td>
       <td>${js.map((j) => `${j.gano ? "🏆 " : ""}${esc(j.nombre)} <b>${j.total}</b>`).join("<br>")}</td>
-      <td class="muted">${(p.temas || []).map(esc).join("<br>")}</td></tr>`;
+      <td class="muted">${(p.temas || []).map(esc).join("<br>")}</td>
+      <td>${p.almasGemelas ? `🕵️ ${esc(p.almasGemelas.a)} y ${esc(p.almasGemelas.b)} (${p.almasGemelas.coincidencias})` : "—"}
+      ${js.some((j) => j.trampas) ? `<br>🚨 ${js.filter((j) => j.trampas).map((j) => `${esc(j.nombre)} (${j.trampas})`).join(", ")}` : ""}</td></tr>`;
   }).join("");
 
   $app.innerHTML = `${encabezado}
@@ -58,8 +60,8 @@ async function cargar(user) {
       <table class="ranking"><thead><tr><th>Nombre / ID</th><th>Alta</th><th>Última vez</th><th class="n">Partidas</th><th class="n">Ganadas</th></tr></thead>
       <tbody>${filasJug || '<tr><td colspan="5" class="muted">Todavía no hay jugadores.</td></tr>'}</tbody></table></div>
     <div class="card scroll"><h3>Historial de partidas</h3>
-      <table class="ranking"><thead><tr><th>Fecha</th><th>Puntajes</th><th>Temas</th></tr></thead>
-      <tbody>${filasPart || '<tr><td colspan="3" class="muted">Todavía no hay partidas.</td></tr>'}</tbody></table></div>`;
+      <table class="ranking"><thead><tr><th>Fecha</th><th>Puntajes</th><th>Temas</th><th>Almas gemelas / trampas</th></tr></thead>
+      <tbody>${filasPart || '<tr><td colspan="4" class="muted">Todavía no hay partidas.</td></tr>'}</tbody></table></div>`;
   document.getElementById("b-salir").onclick = (e) => { e.preventDefault(); signOut(auth); };
 }
 
