@@ -1,11 +1,12 @@
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { auth, db, configurado } from "./firebase.js";
+import { lockup } from "./marca.js";
 
 const $app = document.getElementById("app");
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const fecha = (t) => (t ? new Date(t).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" }) : "—");
-const encabezado = `<div class="barra"><div class="logo logo-chico"><span>un<span class="acento">á</span>nime</span><span class="burbuja">✓</span></div><a href="./" class="btn blanco chico">Ir al juego</a></div><h2>Panel de admin</h2>`;
+const encabezado = `<div class="barra">${lockup()}<a href="./" class="btn blanco chico">Ir al juego</a></div><h2>Panel de admin</h2>`;
 
 function pantallaLogin(msg = "") {
   $app.innerHTML = `${encabezado}<div class="card"><p>Ingresá con la cuenta de Google de admin.</p>

@@ -36,7 +36,7 @@ export function repetidas(lista) {
   return rep;
 }
 
-// Agrupa palabras equivalentes (automáticas + "yo también"), sin los nodos excluidos
+// Agrupa palabras equivalentes (automáticas + "lo mismo digo"), sin los nodos excluidos
 function agrupar(resp, vinc, orden, excluidos) {
   const padre = {};
   const nodos = [];

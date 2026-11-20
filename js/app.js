@@ -3,6 +3,7 @@ import { ref, get, set, update, remove, push, onValue, serverTimestamp } from "h
 import { auth, db, configurado } from "./firebase.js";
 import { TEMAS } from "./temas.js";
 import { calcularCategoria, almasGemelas, repetidas, PENALIDAD_TRAMPA } from "./puntaje.js";
+import { logo as logoMarca, lockup, destello } from "./marca.js";
 
 const RONDAS = 2;
 const CATS_POR_RONDA = 3;
@@ -36,7 +37,8 @@ const S = {
 
 // ---------- utilidades ----------
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const logo = (clase) => `<div class="logo ${clase}"><span>un<span class="acento">á</span>nime</span><span class="burbuja">✓</span></div>`;
+const logo = (clase) => (clase === "logo-chico" ? lockup() : `<div class="logo-grande">${logoMarca(true)}</div>`);
+const TAGLINE = `<p class="tagline">El juego donde ganás si pensás igual.</p>`;
 const denegado = (e) => String(e && (e.code || e.message)).toLowerCase().includes("permission");
 const ahora = () => Date.now() + S.offset;
 const jugadoresOrden = (sala) => Object.entries(sala.jugadores || {})
@@ -154,7 +156,7 @@ function irA(pantalla) {
 function pantallaClave() {
   return `
     ${logo("logo-grande")}
-    <p class="muted">El juego de pensar igual que los demás.</p>
+    ${TAGLINE}
     <div class="card">
       <h2>Entrá al equipo</h2>
       <p class="muted">Pedile la clave a quien te pasó el link. Solo te la pedimos una vez.</p>
@@ -163,8 +165,8 @@ function pantallaClave() {
         <label for="nombre">Tu nombre</label>
         <input type="text" id="nombre" maxlength="20" required value="${esc(S.nombre)}" autocomplete="given-name">
         <label for="clave">Clave del equipo</label>
-        <input type="text" id="clave" required autocomplete="off">
-        <div style="margin-top:18px"><button class="btn coral full" type="submit">Entrar</button></div>
+        <input type="password" id="clave" required autocomplete="off">
+        <div style="margin-top:18px"><button class="btn coral full" type="submit">${destello("#D5F04B")}Entrar a jugar</button></div>
       </form>
     </div>`;
 }
@@ -191,7 +193,7 @@ function bindClave() {
 function pantallaInicio() {
   return `
     ${logo("logo-grande")}
-    <p class="muted">El juego de pensar igual que los demás.</p>
+    ${TAGLINE}
     ${S.error ? `<div class="error">${esc(S.error)}</div>` : ""}
     <div class="card">
       <label for="nombre" style="margin-top:0">Jugás como</label>
@@ -332,7 +334,7 @@ function cambiosEntrarTema(i, turno) {
 function iniciarEscritura(tema, por) {
   const i = S.sala.catIndex;
   const c = { estado: "escribiendo", [`cats/${i}/tema`]: tema, [`cats/${i}/por`]: por || null };
-  if (ajustes().fin === "tiempo") c[`cats/${i}/finEn`] = ahora() + ajustes().minutos * 60000 + 1500;
+  if (ajustes().fin === "tiempo") c[`cats/${i}/finEn`] = ahora() + ajustes().minutos * 60000;
   return update(salaRef(), c);
 }
 
@@ -532,7 +534,7 @@ const estoyListo = () => !!catActual().listos?.[S.uid];
 const tiempoTerminado = () => !!catActual().finEn && catActual().finEn - ahora() <= 0;
 
 function tarjetaTema(cat, chica) {
-  return `<div class="tema" ${chica ? 'style="font-size:1.3rem;padding:16px"' : ""}>${cat.por ? `<small>Propuesta por ${nombreDe(cat.por)}</small>` : ""}${esc(cat.tema)}</div>`;
+  return `<div class="tema ${chica ? "chica" : ""}">${cat.por ? `<small>Propuesta por ${nombreDe(cat.por)}</small>` : ""}${esc(cat.tema)}</div>`;
 }
 
 function pantallaEscribir() {
@@ -625,18 +627,18 @@ function objecionesPendientes(cat) {
 function accionesObjecion(k, uidObjetado, estado, objetores) {
   if (estado) return estado === "vale" ? " ✅" : "";
   if (objetores.length) {
-    let h = ` <span class="obj">🚩 ${objetores.map(nombreDe).join(", ")}</span>`;
+    let h = ` <span class="obj">¿Será? · ${objetores.map(nombreDe).join(", ")}</span>`;
     if (soyAnfitrion()) h += `<span class="decidir"><button data-resolver="${k}" data-v="vale" title="Vale">✅</button><button data-resolver="${k}" data-v="novale" title="No vale">❌</button><button data-resolver="${k}" data-v="trampa" title="Trampa: −${PENALIDAD_TRAMPA}">🚨</button></span>`;
     return h;
   }
-  return uidObjetado !== S.uid ? ` <button class="mini" data-objetar="${k}" title="Objetar">🚩</button>` : "";
+  return uidObjetado !== S.uid ? ` <button class="mini" data-objetar="${k}" title="Poner en duda">¿Será?</button>` : "";
 }
 
 function chipJugador(m, objeciones) {
   const k = `${m.uid}_${m.i}`;
   const anulado = m.estado === "novale" || m.estado === "trampa";
   const pal = S.resp[S.sala.catIndex]?.[m.uid]?.[m.i] || "";
-  return `<span class="chip ${m.uid === S.uid ? "yo" : ""} ${anulado ? "anulado" : ""}">${m.uid === S.uid ? "Vos" : nombreDe(m.uid)}${m.manual ? ` 🙋 <i>${esc(pal)}</i>` : ""}${m.estado === "trampa" ? " 🚨" : ""}${accionesObjecion(k, m.uid, m.estado, Object.keys(objeciones[k] || {}))}</span>`;
+  return `<span class="chip ${m.uid === S.uid ? "yo" : ""} ${anulado ? "anulado" : ""}">${m.uid === S.uid ? "Vos" : nombreDe(m.uid)}${m.manual ? ` 💬 <i>${esc(pal)}</i>` : ""}${m.estado === "trampa" ? " 🚨" : ""}${accionesObjecion(k, m.uid, m.estado, Object.keys(objeciones[k] || {}))}</span>`;
 }
 
 function pantallaRevision() {
@@ -661,8 +663,8 @@ function pantallaRevision() {
     let accion = "";
     if (!esLector) {
       const miEstado = cat.resoluciones?.[`${S.uid}_${miLink?.[0]}`];
-      if (conmigo && miLink && !miEstado) accion = `<button class="btn blanco chico" data-quitar="${miLink[0]}">Deshacer "yo también"</button>`;
-      else if (!conmigo && mias.length) accion = `<button class="btn chico" data-yo="${i}">🙋 Yo también</button>`;
+      if (conmigo && miLink && !miEstado) accion = `<button class="btn blanco chico" data-quitar="${miLink[0]}">Deshacer "lo mismo digo"</button>`;
+      else if (!conmigo && mias.length) accion = `<button class="btn chico" data-yo="${i}">💬 Lo mismo digo</button>`;
       if (S.picker === i && !conmigo) {
         accion += `<div class="picker"><span class="muted" style="width:100%">¿Cuál de tus palabras es equivalente?</span>
           ${mias.map((m) => `<button class="btn menta chico" data-elegir="${m.i}" data-para="${i}">${esc(m.t)}</button>`).join("")}
@@ -682,9 +684,9 @@ function pantallaRevision() {
   return `${barraSala()}
     ${tarjetaTema(cat, true)}
     <div class="entre"><h2>${esLector ? "Leé tus palabras" : `Lee ${nombreDe(lector)}`}</h2><span class="muted">${turno + 1} de ${orden.length}</span></div>
-    <p class="muted">Si escribiste lo mismo o un sinónimo (no subcategorías), tocá "Yo también". ¿Algo no cierra? Tocá 🚩 sobre esa persona y lo debaten.</p>
+    <p class="muted">Si escribiste lo mismo o un sinónimo (no subcategorías), tocá "Lo mismo digo". ¿Algo no cierra? Tocá "¿Será?" sobre esa persona y lo debaten.</p>
     <div class="lista">${items || '<p class="muted">No escribió palabras.</p>'}</div>
-    ${pendientes ? `<div class="error" style="margin-top:16px">🚩 Hay ${pendientes} ${pendientes === 1 ? "objeción" : "objeciones"} sin resolver. ${soyAnfitrion() ? `Decidí con ✅ vale, ❌ no vale o 🚨 trampa (−${PENALIDAD_TRAMPA} puntos).` : `${nombreDe(s.anfitrion)} decide después del debate.`}</div>` : ""}
+    ${pendientes ? `<div class="error" style="margin-top:16px">🤨 Hay ${pendientes} "¿será?" sin resolver. ${soyAnfitrion() ? `Decidí con ✅ vale, ❌ no vale o 🚨 trampa (−${PENALIDAD_TRAMPA} puntos).` : `${nombreDe(s.anfitrion)} decide después del debate.`}</div>` : ""}
     ${soyAnfitrion() ? `<div style="margin-top:22px" class="fila">
         ${ultimo ? "" : `<button class="btn blanco" id="b-ver" ${pendientes ? "disabled" : ""}>Saltar a puntajes</button>`}
         <button class="btn coral crece" id="b-sig" ${pendientes ? "disabled" : ""}>${ultimo ? "Ver puntajes de la categoría" : `Siguiente: ${nombreDe(orden[turno + 1])}`}</button>
@@ -815,7 +817,7 @@ function pantallaFinal() {
     tarjetaAlmas = `<div class="card almas"><div class="podio">🕵️‍♀️🔍</div><h2>Mención especial: Almas gemelas</h2><p>${chiste}</p><p class="muted">No suma puntos. Solo gloria (y sospechas).</p></div>`;
   }
   return `${barraSala({ marcador: false })}
-    <div class="card" style="text-align:center">
+    <div class="card ganador">
       <div class="podio">🏆</div>
       <h2>${ganadores.length > 1 ? "¡Empate!" : "¡Ganó " + nombreDe(ganadores[0]) + "!"}</h2>
       <p class="muted">${ganadores.length > 1 ? ganadores.map(nombreDe).join(" y ") + " con " : "Con "}${max} puntos</p>
