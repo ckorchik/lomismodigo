@@ -157,7 +157,7 @@ function pantallaClave() {
   return `
     ${logo("logo-grande")}
     ${TAGLINE}
-    <div class="card">
+    <div class="col-inicio"><div class="card">
       <h2>Entrá al equipo</h2>
       <p class="muted">Pedile la clave a quien te pasó el link. Solo te la pedimos una vez.</p>
       ${S.error ? `<div class="error">${esc(S.error)}</div>` : ""}
@@ -168,7 +168,7 @@ function pantallaClave() {
         <input type="password" id="clave" required autocomplete="off">
         <div style="margin-top:18px"><button class="btn coral full" type="submit">${destello("#D5F04B")}Entrar a jugar</button></div>
       </form>
-    </div>`;
+    </div></div>`;
 }
 
 function bindClave() {
@@ -194,6 +194,7 @@ function pantallaInicio() {
   return `
     ${logo("logo-grande")}
     ${TAGLINE}
+    <div class="col-inicio">
     ${S.error ? `<div class="error">${esc(S.error)}</div>` : ""}
     <div class="card">
       <label for="nombre" style="margin-top:0">Jugás como</label>
@@ -206,6 +207,7 @@ function pantallaInicio() {
         <input class="crece" type="text" id="codigo" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;letter-spacing:.2em;flex:1;width:auto">
         <button class="btn menta" type="submit">Unirme</button>
       </form>
+    </div>
     </div>
     <div class="pie">Inspirado en los juegos de palabras de toda la vida.</div>`;
 }

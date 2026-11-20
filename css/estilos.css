@@ -39,7 +39,7 @@ p { line-height: 1.45; }
 .lmd .sp1 { position: absolute; left: 14%; top: 46%; width: .78em; z-index: 3; }
 .lmd .sp2 { position: absolute; left: 31%; top: 76%; width: .32em; z-index: 3; }
 .lmd .pts { position: absolute; font-size: .3em; right: -6%; top: -16%; border-radius: 999px; padding: .15em .6em; transform: rotate(8deg); z-index: 3; background: var(--lima); color: var(--tinta); }
-.logo-grande { font-size: clamp(48px, 13vw, 72px); margin: 34px 0 14px; display: flex; justify-content: center; }
+.logo-grande { font-size: clamp(48px, 13vw, 72px); margin: 34px 0 .55em; display: flex; justify-content: center; }
 .anim .bub.out { animation: flotaA 5s ease-in-out infinite; }
 .anim .bub.fill { animation: flotaB 5s ease-in-out infinite; }
 .anim .sp1 { animation: brillo 3.2s ease-in-out infinite; }
@@ -52,6 +52,13 @@ p { line-height: 1.45; }
 .lockup { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.04em; font-size: 1.25rem; }
 .lockup svg { flex: none; }
 .tagline { text-align: center; font-size: 1.15rem; margin: 0 0 6px; }
+
+/* ---------- Columna angosta de inicio (anchos de la grilla de Bootstrap) ----------
+   xs: 100% · md: col-8 de 720 · lg: col-6 de 960 · xl: col-5 de 1140 · xxl: col-4 de 1320 */
+.col-inicio { width: 100%; margin: 0 auto; }
+@media (min-width: 768px) { .col-inicio { max-width: 456px; } }
+@media (min-width: 1200px) { .col-inicio { max-width: 451px; } }
+@media (min-width: 1400px) { .col-inicio { max-width: 416px; } }
 
 /* ---------- Tarjetas y botones ---------- */
 .card { background: var(--blanco); border: var(--borde); border-radius: var(--radio); padding: 22px; margin: 18px 0; }

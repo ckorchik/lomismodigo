@@ -97,3 +97,5 @@ Para probar en local: VS Code → Go Live, y ventanas de incógnito o de otro na
 - **v2 (2026-11-20):** ajustes de sala (por tiempo y categoría por turnos), palabras protegidas hasta el cierre, objeciones con penalidad por trampa, almas gemelas y bloqueo de palabras repetidas. Requiere las reglas nuevas.
 - **v2.1 (2026-11-20):** mínimo de 3 jugadores para empezar la partida.
 - **v3 (2026-11-20):** nueva identidad "Lo Mismo Digo": logo de burbujas, paleta, tipografía y favicon. "Yo también" pasa a "Lo mismo digo" y la objeción pasa a "¿Será?". El reloj ya no suma 1,5 s extra en pantalla. El repositorio pasa a llamarse `lomismodigo` (cambia el link del sitio).
+- **v3.1 (2026-11-20):** más espacio entre el logo y la frase de la pantalla de entrada (en desktop se pisaban).
+- **v3.2 (2026-11-20):** las tarjetas de las pantallas de entrada e inicio son más angostas y siguen los anchos de la grilla de Bootstrap (clase `.col-inicio`).
