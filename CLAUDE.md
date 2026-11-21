@@ -40,14 +40,15 @@ HTML, CSS y JavaScript sin frameworks ni build. Firebase se carga por CDN (v10.1
 ## Reglas del juego (modo Clásico)
 
 - Se juega con **3 jugadores como mínimo**.
-- Una partida tiene **2 rondas de 3 categorías** (6 temas en total).
+- Una partida tiene **de 1 a 4 rondas** (las elige el anfitrión; por defecto 2), y cada ronda tiene **3 categorías**.
 - En cada categoría, cada jugador escribe **6 palabras** sobre el tema. No puede repetir palabras en su propia lista.
 - **Puntaje:** cada palabra suma tantos puntos como jugadores la escribieron. Si nadie más la escribió, vale 0. Se aceptan plurales, tildes y sinónimos, pero no subcategorías.
-- **Revisión:** se recorren las listas jugador por jugador. Los demás pueden tocar "💬 Lo mismo digo" para vincular un sinónimo propio.
+- **Revisión:** se recorren las listas jugador por jugador (el anfitrión puede volver al anterior). Los demás pueden tocar "💬 Lo mismo digo" para vincular un sinónimo propio.
 - **Objeciones ("¿Será?"):** se debaten al final de cada categoría, en la tabla donde se ven las palabras de todos. Cualquiera toca "¿Será?" en una palabra con puntos de otra persona. El anfitrión resuelve solo para esa persona: ✅ vale, ❌ no vale (vale 0) o 🚨 trampa (vale 0 y −3 puntos). No se puede pasar a la siguiente categoría con objeciones pendientes.
 - Después de cada categoría, todos ven la tabla con las palabras y los puntos de cada jugador, más el acumulado. Al cerrar cada ronda se muestra un subtotal, y al terminar, el ranking final.
 - **Almas gemelas:** mención especial (no suma puntos) para la pareja que más coincidió, si se destaca (3 o más coincidencias y sin empate). Se muestra con chistes de detective, WhatsApp y Slack.
 - **Ajustes de la sala** (los elige el anfitrión en la sala de espera):
+  - **Cantidad de rondas:** de 1 a 4.
   - **Fin de categoría:** cuando terminan todos, o por tiempo (de 1 a 10 minutos, con reloj; si todos terminan antes, se cierra igual).
   - **Elección de categoría:** el anfitrión (al azar del mazo o tema propio), o por turnos (a cada jugador le aparece un modal para proponer, con la opción "Sorteame una"; el anfitrión puede saltar el turno).
 - Los modos Cronómetro, Iniciales prohibidas, Idioma y Equipos aparecen con 🔒 "Próximamente" y todavía no están desarrollados.
@@ -63,7 +64,7 @@ HTML, CSS y JavaScript sin frameworks ni build. Firebase se carga por CDN (v10.1
 ## Modelo de datos (Realtime Database)
 
 - `miembros/{uid}`: nombre, clave, alta, ultimaVez
-- `salas/{CODIGO}`: anfitrion, modo, estado (`espera`, `tema`, `escribiendo`, `revision`, `tabla`, `final`), catIndex, catKey (string), partida (string), turno, ajustes `{fin, minutos, eleccion}`, jugadores, guardado
+- `salas/{CODIGO}`: anfitrion, modo, estado (`espera`, `tema`, `escribiendo`, `revision`, `tabla`, `final`), catIndex, catKey (string), partida (string), turno, ajustes `{fin, minutos, eleccion, rondas}`, jugadores, guardado
   - `cats/{i}`: tema, por, proponente, propuesta/{uid}, finEn, listos/{uid}, vinculos/{uid}/{idx}: `{u, i}`, objeciones/{uid_idx}/{objetor} (se escriben en estado `tabla`), resoluciones/{uid_idx}
 - `respuestas/{CODIGO}/{partida}/{i}/{uid}`: palabras[6]
 - `historial/{id}`: fecha, sala, ajustes, temas, jugadores (total, rondas, gano, trampas), ganadores, almasGemelas
@@ -105,3 +106,4 @@ Para probar en local: VS Code → Go Live, y ventanas de incógnito o de otro na
 - **v3.4 (2026-11-20):** el "+3" queda unos 10 px más superpuesto sobre la burbuja "lo mismo".
 - **v3.5 (2026-11-20):** el campo "Clave del equipo" tiene un ícono de ojo (Material) para mostrar u ocultar lo que se escribe.
 - **v3.6 (2026-11-20):** "¿Será?" pasa de la revisión a la tabla de la categoría, donde se ven las palabras de todos. Requiere actualizar las reglas de Firebase (objeciones en estado `tabla`).
+- **v3.7 (2026-11-21):** el anfitrión puede volver al jugador anterior en la revisión; las hojas de puntaje tienen la misma altura con el total alineado; se puede elegir la cantidad de rondas (1 a 4); se arregla el modo "categorías por turnos", que no arrancaba (un update de Firebase borraba y escribía `cats` a la vez).

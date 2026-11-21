@@ -183,10 +183,10 @@ input.repetida { border-color: var(--coral); background: #ffe3df; }
 
 /* ---------- Hojas de puntaje ---------- */
 .grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
-.hoja { background: var(--blanco); border: var(--borde); border-radius: 22px; overflow: hidden; }
+.hoja { background: var(--blanco); border: var(--borde); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; }
 .hoja header { background: var(--tinta); color: var(--crema); padding: 9px 14px; font-weight: 800; }
 .hoja.yo header { background: var(--coral); }
-.hoja ol { list-style: none; margin: 0; padding: 6px 14px; }
+.hoja ol { list-style: none; margin: 0; padding: 6px 14px; flex: 1; }
 .hoja li { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1.5px dashed #17142b26; }
 .hoja li:last-child { border-bottom: 0; }
 .hoja li .p0 { color: var(--suave); }

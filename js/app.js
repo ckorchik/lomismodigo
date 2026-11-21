@@ -5,11 +5,10 @@ import { TEMAS } from "./temas.js";
 import { calcularCategoria, almasGemelas, repetidas, PENALIDAD_TRAMPA } from "./puntaje.js";
 import { logo as logoMarca, lockup, destello } from "./marca.js";
 
-const RONDAS = 2;
 const CATS_POR_RONDA = 3;
-const TOTAL_CATS = RONDAS * CATS_POR_RONDA;
+const MAX_RONDAS = 4;
 const MIN_JUGADORES = 3;
-const AJUSTES_BASE = { fin: "todos", minutos: 2, eleccion: "anfitrion" };
+const AJUSTES_BASE = { fin: "todos", minutos: 2, eleccion: "anfitrion", rondas: 2 };
 
 const MODOS = [
   { id: "clasico", nombre: "Clásico", desc: "6 palabras por tema. Sumás puntos coincidiendo con los demás.", activo: true },
@@ -54,6 +53,8 @@ const soyAnfitrion = () => S.sala && S.sala.anfitrion === S.uid;
 const ajustes = () => ({ ...AJUSTES_BASE, ...(S.sala?.ajustes || {}) });
 const salaRef = (p = "") => ref(db, `salas/${S.codigo}${p ? "/" + p : ""}`);
 const respRef = (i, uid) => ref(db, `respuestas/${S.codigo}/${S.sala.partida}/${i}${uid ? "/" + uid : ""}`);
+const RONDAS = () => Math.min(MAX_RONDAS, Math.max(1, Number(ajustes().rondas) || 2));
+const TOTAL_CATS = () => RONDAS() * CATS_POR_RONDA;
 const catActual = () => S.sala.cats?.[S.sala.catIndex] || {};
 
 function generarCodigo() {
@@ -84,10 +85,10 @@ function puntajes(sala) {
   const orden = jugadoresOrden(sala);
   const porCat = [];
   const cerradaHasta = ["tabla", "final"].includes(sala.estado) ? sala.catIndex : sala.catIndex - 1;
-  for (let i = 0; i <= cerradaHasta && i < TOTAL_CATS; i++) porCat[i] = calcularCategoria(datosCat(i), orden);
+  for (let i = 0; i <= cerradaHasta && i < TOTAL_CATS(); i++) porCat[i] = calcularCategoria(datosCat(i), orden);
   const tot = {};
   for (const uid of orden) {
-    const rondas = Array(RONDAS).fill(0);
+    const rondas = Array(RONDAS()).fill(0);
     porCat.forEach((c, i) => { if (c) rondas[Math.floor(i / CATS_POR_RONDA)] += c[uid]?.total || 0; });
     tot[uid] = { rondas, total: rondas.reduce((a, b) => a + b, 0) };
   }
@@ -101,7 +102,7 @@ function sincronizarRespuestas() {
     Object.values(S.subs).forEach((u) => u());
     S.subs = {}; S.resp = {}; S.partidaResp = s.partida;
   }
-  for (let i = 0; i <= s.catIndex && i < TOTAL_CATS; i++) {
+  for (let i = 0; i <= s.catIndex && i < TOTAL_CATS(); i++) {
     const legible = i < s.catIndex || !["escribiendo", "tema"].includes(s.estado);
     if (!legible || S.subs[i]) continue;
     S.subs[i] = onValue(respRef(i), (snap) => {
@@ -257,7 +258,7 @@ function pantallaModos() {
   return `
     <div class="barra"><button class="btn blanco chico" id="b-volver">← Volver</button></div>
     <h2>Elegí el modo de juego</h2>
-    <p class="muted">${RONDAS} rondas de ${CATS_POR_RONDA} categorías cada una. Los ajustes los elegís en la sala.</p>
+    <p class="muted">Cada ronda tiene ${CATS_POR_RONDA} categorías. La cantidad de rondas y los demás ajustes los elegís en la sala.</p>
     <div class="modos">
       ${MODOS.map((m) => `
         <button class="modo ${m.activo ? (S.modo === m.id ? "activo" : "") : "bloqueado"}" data-modo="${m.id}" ${m.activo ? "" : 'aria-disabled="true"'}>
@@ -420,7 +421,7 @@ function barraSala({ marcador = true } = {}) {
 
 // --- Espera
 function textoAjustes(a) {
-  return `${a.fin === "tiempo" ? `⏱ ${a.minutos} min por categoría` : "✋ Se cierra cuando terminan todos"} · ${a.eleccion === "turnos" ? "🔄 Categorías por turnos" : "👑 Elige el anfitrión"}`;
+  return `🔁 ${RONDAS()} ${RONDAS() === 1 ? "ronda" : "rondas"} (${TOTAL_CATS()} categorías) · ${a.fin === "tiempo" ? `⏱ ${a.minutos} min por categoría` : "✋ Se cierra cuando terminan todos"} · ${a.eleccion === "turnos" ? "🔄 Categorías por turnos" : "👑 Elige el anfitrión"}`;
 }
 
 function pantallaEspera() {
@@ -430,6 +431,10 @@ function pantallaEspera() {
   const link = `${location.origin}${location.pathname}?sala=${S.codigo}`;
   const opcion = (campo, valor, texto) => `<button class="seg ${a[campo] === valor ? "on" : ""}" data-campo="${campo}" data-valor="${valor}">${texto}</button>`;
   const panelAjustes = soyAnfitrion() ? `
+      <label>¿Cuántas rondas?</label>
+      <div class="fila"><button class="btn blanco chico" id="r-menos" ${RONDAS() <= 1 ? "disabled" : ""}>−</button>
+        <b style="min-width:150px;text-align:center">${RONDAS()} ${RONDAS() === 1 ? "ronda" : "rondas"} · ${TOTAL_CATS()} categorías</b>
+        <button class="btn blanco chico" id="r-mas" ${RONDAS() >= MAX_RONDAS ? "disabled" : ""}>+</button></div>
       <label>¿Cuándo termina cada categoría?</label>
       <div class="segmentado">${opcion("fin", "todos", "✋ Cuando terminan todos")}${opcion("fin", "tiempo", "⏱ Por tiempo")}</div>
       ${a.fin === "tiempo" ? `<div class="fila" style="margin-top:10px"><button class="btn blanco chico" id="b-menos" ${a.minutos <= 1 ? "disabled" : ""}>−</button>
@@ -471,8 +476,18 @@ function bindEspera() {
   const mm = (d) => update(salaRef("ajustes"), { minutos: Math.min(10, Math.max(1, ajustes().minutos + d)) });
   document.getElementById("b-menos")?.addEventListener("click", () => mm(-1));
   document.getElementById("b-mas")?.addEventListener("click", () => mm(1));
+  const rr = (d) => update(salaRef("ajustes"), { rondas: Math.min(MAX_RONDAS, Math.max(1, RONDAS() + d)) });
+  document.getElementById("r-menos")?.addEventListener("click", () => rr(-1));
+  document.getElementById("r-mas")?.addEventListener("click", () => rr(1));
   const be = document.getElementById("b-empezar");
-  if (be) be.onclick = () => update(salaRef(), { cats: null, guardado: null, ...cambiosEntrarTema(0, 0) });
+  if (be) be.onclick = () => {
+    // No se puede borrar "cats" y escribir "cats/0/..." en el mismo update: se arma el objeto completo
+    const c = { guardado: null, ...cambiosEntrarTema(0, 0) };
+    const prop = c["cats/0/proponente"];
+    delete c["cats/0/proponente"];
+    c.cats = prop ? { 0: { proponente: prop } } : null;
+    update(salaRef(), c).catch((e) => alert("No se pudo empezar: " + e.message));
+  };
 }
 
 // --- Elegir tema
@@ -706,6 +721,7 @@ function pantallaRevision() {
     <p class="muted">Si escribiste lo mismo o un sinónimo (no subcategorías), tocá "Lo mismo digo". Si algo no cierra, lo debaten al final, cuando se ven las palabras de todos.</p>
     <div class="lista">${items || '<p class="muted">No escribió palabras.</p>'}</div>
     ${soyAnfitrion() ? `<div style="margin-top:22px" class="fila">
+        ${turno > 0 ? `<button class="btn blanco" id="b-ant">← ${nombreDe(orden[turno - 1])}</button>` : ""}
         ${ultimo ? "" : `<button class="btn blanco" id="b-ver">Saltar a puntajes</button>`}
         <button class="btn coral crece" id="b-sig">${ultimo ? "Ver puntajes de la categoría" : `Siguiente: ${nombreDe(orden[turno + 1])}`}</button>
       </div>` : `<p class="muted" style="margin-top:20px">${nombreDe(s.anfitrion)} pasa al siguiente jugador.</p>`}`;
@@ -731,13 +747,15 @@ function bindRevision() {
   };
   const ver = document.getElementById("b-ver");
   if (ver) ver.onclick = () => update(salaRef(), { estado: "tabla" });
+  const ant = document.getElementById("b-ant");
+  if (ant) ant.onclick = () => update(salaRef(), { revisionTurno: Math.max(0, (s.revisionTurno || 0) - 1) });
 }
 
 // --- Tabla de la categoría
 function tablaRanking(orden, tot, conRondas) {
   const ord = [...orden].sort((a, b) => tot[b].total - tot[a].total);
   return `<table class="ranking"><thead><tr><th>#</th><th>Jugador</th>
-    ${conRondas ? Array.from({ length: RONDAS }, (_, r) => `<th class="n">R${r + 1}</th>`).join("") : ""}<th class="n">Total</th></tr></thead>
+    ${conRondas ? Array.from({ length: RONDAS() }, (_, r) => `<th class="n">R${r + 1}</th>`).join("") : ""}<th class="n">Total</th></tr></thead>
     <tbody>${ord.map((u, i) => `<tr class="${u === S.uid ? "yo" : ""}"><td>${i + 1}</td><td>${nombreDe(u)}</td>
       ${conRondas ? tot[u].rondas.map((r) => `<td class="n">${r}</td>`).join("") : ""}<td class="n"><b>${tot[u].total}</b></td></tr>`).join("")}</tbody></table>`;
 }
@@ -751,7 +769,7 @@ function pantallaTabla() {
   const objeciones = cat.objeciones || {};
   const pendientes = objecionesPendientes(cat).length;
   const finRonda = s.catIndex % CATS_POR_RONDA === CATS_POR_RONDA - 1;
-  const ultima = s.catIndex >= TOTAL_CATS - 1;
+  const ultima = s.catIndex >= TOTAL_CATS() - 1;
   const ronda = Math.floor(s.catIndex / CATS_POR_RONDA);
   const hojas = orden.map((u) => `
     <div class="hoja ${u === S.uid ? "yo" : ""}">
@@ -790,7 +808,7 @@ function pantallaTabla() {
 }
 
 function resultadoFinal() {
-  const { orden, porCat, tot } = puntajes({ ...S.sala, estado: "final", catIndex: TOTAL_CATS - 1 });
+  const { orden, porCat, tot } = puntajes({ ...S.sala, estado: "final", catIndex: TOTAL_CATS() - 1 });
   const max = Math.max(...orden.map((u) => tot[u].total));
   return { orden, porCat, tot, max, almas: almasGemelas(porCat, orden) };
 }
@@ -805,7 +823,7 @@ async function guardarHistorial() {
   });
   await push(ref(db, "historial"), {
     fecha: serverTimestamp(), sala: S.codigo, modo: s.modo, anfitrion: s.anfitrion, ajustes: ajustes(),
-    temas: Array.from({ length: TOTAL_CATS }, (_, i) => s.cats?.[i]?.tema || ""),
+    temas: Array.from({ length: TOTAL_CATS() }, (_, i) => s.cats?.[i]?.tema || ""),
     jugadores, ganadores: orden.filter((u) => tot[u].total === max).map((u) => s.jugadores[u].nombre),
     almasGemelas: almas ? { a: s.jugadores[almas.a].nombre, b: s.jugadores[almas.b].nombre, coincidencias: almas.n } : null,
   });
@@ -822,7 +840,7 @@ function bindTabla() {
   b.onclick = async () => {
     const s = S.sala;
     b.disabled = true;
-    if (s.catIndex >= TOTAL_CATS - 1) {
+    if (s.catIndex >= TOTAL_CATS() - 1) {
       if (!s.guardado) {
         try { await guardarHistorial(); } catch (e) { console.warn("No se guardó el historial", e); }
       }
@@ -836,7 +854,7 @@ function bindTabla() {
 // --- Final
 function pantallaFinal() {
   const s = S.sala;
-  if (Array.from({ length: TOTAL_CATS }, (_, i) => S.resp[i]).some((r) => !r)) return `${barraSala({ marcador: false })}<p class="muted">Cargando…</p>`;
+  if (Array.from({ length: TOTAL_CATS() }, (_, i) => S.resp[i]).some((r) => !r)) return `${barraSala({ marcador: false })}<p class="muted">Cargando…</p>`;
   const { orden, tot, max, almas } = resultadoFinal();
   const ganadores = orden.filter((u) => tot[u].total === max);
   let tarjetaAlmas = "";
