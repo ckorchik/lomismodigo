@@ -74,6 +74,8 @@ HTML, CSS y JavaScript sin frameworks ni build. Firebase se carga por CDN (v10.1
 2. En GitHub Desktop: escribir un Summary, Commit to main y después Push origin. GitHub Pages se actualiza en uno o dos minutos.
 3. Actualizar este archivo en el mismo commit.
 
+La carpeta `Claude outputs/` (capturas que guarda la app de Claude) está en `.gitignore`, así que nunca se sube.
+
 Para probar en local: VS Code → Go Live, y ventanas de incógnito o de otro navegador para los demás jugadores (se necesitan 3).
 
 ## Identidad visual (definida)
@@ -99,3 +101,6 @@ Para probar en local: VS Code → Go Live, y ventanas de incógnito o de otro na
 - **v3 (2026-11-20):** nueva identidad "Lo Mismo Digo": logo de burbujas, paleta, tipografía y favicon. "Yo también" pasa a "Lo mismo digo" y la objeción pasa a "¿Será?". El reloj ya no suma 1,5 s extra en pantalla. El repositorio pasa a llamarse `lomismodigo` (cambia el link del sitio).
 - **v3.1 (2026-11-20):** más espacio entre el logo y la frase de la pantalla de entrada (en desktop se pisaban).
 - **v3.2 (2026-11-20):** las tarjetas de las pantallas de entrada e inicio son más angostas y siguen los anchos de la grilla de Bootstrap (clase `.col-inicio`).
+- **v3.3 (2026-11-20):** la etiqueta "+3" del logo tiene un solo borde, del mismo grosor que la burbuja "lo mismo", y más aire entre el + y el 3.
+- **v3.4 (2026-11-20):** el "+3" queda unos 10 px más superpuesto sobre la burbuja "lo mismo".
+- **v3.5 (2026-11-20):** el campo "Clave del equipo" tiene un ícono de ojo (Material) para mostrar u ocultar lo que se escribe.

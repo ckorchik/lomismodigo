@@ -38,7 +38,7 @@ p { line-height: 1.45; }
 .bub.fill::after { content: ""; position: absolute; bottom: -.26em; right: .55em; width: .5em; height: .5em; background: inherit; clip-path: polygon(0 0, 100% 0, 100% 100%); }
 .lmd .sp1 { position: absolute; left: 14%; top: 46%; width: .78em; z-index: 3; }
 .lmd .sp2 { position: absolute; left: 31%; top: 76%; width: .32em; z-index: 3; }
-.lmd .pts { position: absolute; font-size: .3em; right: -6%; top: -16%; border-radius: 999px; padding: .15em .6em; transform: rotate(8deg); z-index: 3; background: var(--lima); color: var(--tinta); }
+.lmd .pts { position: absolute; font-size: .3em; right: -3.5%; top: -10%; border: 0; border-radius: 999px; padding: .15em .6em; transform: rotate(8deg); z-index: 3; background: var(--lima); color: var(--tinta); min-width: 0; letter-spacing: .04em; box-shadow: inset 0 0 0 calc(.055em / .3) var(--tinta); }
 .logo-grande { font-size: clamp(48px, 13vw, 72px); margin: 34px 0 .55em; display: flex; justify-content: center; }
 .anim .bub.out { animation: flotaA 5s ease-in-out infinite; }
 .anim .bub.fill { animation: flotaB 5s ease-in-out infinite; }
@@ -91,6 +91,14 @@ input[type=text], input[type=password] {
 }
 input[type=text]:focus, input[type=password]:focus { box-shadow: 4px 4px 0 var(--lima), 4px 4px 0 3px var(--tinta); transform: translate(-2px, -2px); }
 input:disabled { background: #f3ede4; color: var(--suave); }
+/* Campo de clave con ojo para mostrar/ocultar */
+.campo-clave { position: relative; }
+.campo-clave input { padding-right: 56px; }
+.ojo { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; display: grid; place-items: center; border: 0; border-radius: 999px; background: transparent; color: var(--tinta); cursor: pointer; transition: background .2s ease; }
+.ojo:hover, .ojo[aria-pressed="true"] { background: var(--lima); }
+.ojo:focus-visible { outline: 3px solid var(--tinta); outline-offset: 1px; }
+.ojo svg { width: 22px; height: 22px; fill: currentColor; }
+.campo-clave input:focus + .ojo { transform: translate(-2px, calc(-50% - 2px)); }
 label { display: block; font-weight: 800; margin: 16px 0 8px; }
 .error { background: #ffe3df; border: 2px solid var(--coral); border-radius: 18px; padding: 10px 16px; margin: 12px 0; }
 

@@ -38,6 +38,11 @@ const S = {
 // ---------- utilidades ----------
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const logo = (clase) => (clase === "logo-chico" ? lockup() : `<div class="logo-grande">${logoMarca(true)}</div>`);
+// Íconos de Material (visibility / visibility_off)
+const ICONO_OJO = {
+  ver: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`,
+  ocultar: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>`,
+};
 const TAGLINE = `<p class="tagline">El juego donde ganás si pensás igual.</p>`;
 const denegado = (e) => String(e && (e.code || e.message)).toLowerCase().includes("permission");
 const ahora = () => Date.now() + S.offset;
@@ -165,13 +170,27 @@ function pantallaClave() {
         <label for="nombre">Tu nombre</label>
         <input type="text" id="nombre" maxlength="20" required value="${esc(S.nombre)}" autocomplete="given-name">
         <label for="clave">Clave del equipo</label>
-        <input type="password" id="clave" required autocomplete="off">
+        <div class="campo-clave">
+          <input type="password" id="clave" required autocomplete="off">
+          <button type="button" class="ojo" id="b-ojo" aria-label="Mostrar clave" aria-pressed="false" title="Mostrar clave">${ICONO_OJO.ver}</button>
+        </div>
         <div style="margin-top:18px"><button class="btn coral full" type="submit">${destello("#D5F04B")}Entrar a jugar</button></div>
       </form>
     </div></div>`;
 }
 
 function bindClave() {
+  const ojo = document.getElementById("b-ojo");
+  ojo.onclick = () => {
+    const inp = document.getElementById("clave");
+    const mostrar = inp.type === "password";
+    inp.type = mostrar ? "text" : "password";
+    ojo.innerHTML = mostrar ? ICONO_OJO.ocultar : ICONO_OJO.ver;
+    ojo.setAttribute("aria-pressed", String(mostrar));
+    ojo.setAttribute("aria-label", mostrar ? "Ocultar clave" : "Mostrar clave");
+    ojo.title = mostrar ? "Ocultar clave" : "Mostrar clave";
+    inp.focus();
+  };
   document.getElementById("f-clave").onsubmit = async (ev) => {
     ev.preventDefault();
     const nombre = document.getElementById("nombre").value.trim();
