@@ -659,7 +659,7 @@ function chipJugador(m, objeciones) {
   const k = `${m.uid}_${m.i}`;
   const anulado = m.estado === "novale" || m.estado === "trampa";
   const pal = S.resp[S.sala.catIndex]?.[m.uid]?.[m.i] || "";
-  return `<span class="chip ${m.uid === S.uid ? "yo" : ""} ${anulado ? "anulado" : ""}">${m.uid === S.uid ? "Vos" : nombreDe(m.uid)}${m.manual ? ` 💬 <i>${esc(pal)}</i>` : ""}${m.estado === "trampa" ? " 🚨" : ""}${accionesObjecion(k, m.uid, m.estado, Object.keys(objeciones[k] || {}))}</span>`;
+  return `<span class="chip ${m.uid === S.uid ? "yo" : ""} ${anulado ? "anulado" : ""}">${m.uid === S.uid ? "Vos" : nombreDe(m.uid)}${m.manual ? ` 💬 <i>${esc(pal)}</i>` : ""}</span>`;
 }
 
 function pantallaRevision() {
@@ -692,25 +692,22 @@ function pantallaRevision() {
           <button class="btn blanco chico" data-cancelar>Cancelar</button></div>`;
       }
     }
-    const objLector = p.grupo.length ? accionesObjecion(kLector, lector, p.estado, Object.keys(objeciones[kLector] || {})) : "";
     return `<div class="palabra-rev ${anulado ? "anulada" : ""}">
-      <div class="entre"><span class="texto">${i + 1}. ${esc(p.texto)}${p.estado === "trampa" ? " 🚨" : ""}${objLector}</span><span class="pts ${p.puntos ? "si" : "no"}">${p.puntos}</span></div>
+      <div class="entre"><span class="texto">${i + 1}. ${esc(p.texto)}</span><span class="pts ${p.puntos ? "si" : "no"}">${p.puntos}</span></div>
       ${p.grupo.length ? `<div class="chips">${p.grupo.map((m) => chipJugador(m, objeciones)).join("")}</div>` : ""}
       ${accion ? `<div style="margin-top:8px">${accion}</div>` : ""}
     </div>`;
   }).join("");
 
-  const pendientes = objecionesPendientes(cat).length;
   const ultimo = turno >= orden.length - 1;
   return `${barraSala()}
     ${tarjetaTema(cat, true)}
     <div class="entre"><h2>${esLector ? "Leé tus palabras" : `Lee ${nombreDe(lector)}`}</h2><span class="muted">${turno + 1} de ${orden.length}</span></div>
-    <p class="muted">Si escribiste lo mismo o un sinónimo (no subcategorías), tocá "Lo mismo digo". ¿Algo no cierra? Tocá "¿Será?" sobre esa persona y lo debaten.</p>
+    <p class="muted">Si escribiste lo mismo o un sinónimo (no subcategorías), tocá "Lo mismo digo". Si algo no cierra, lo debaten al final, cuando se ven las palabras de todos.</p>
     <div class="lista">${items || '<p class="muted">No escribió palabras.</p>'}</div>
-    ${pendientes ? `<div class="error" style="margin-top:16px">🤨 Hay ${pendientes} "¿será?" sin resolver. ${soyAnfitrion() ? `Decidí con ✅ vale, ❌ no vale o 🚨 trampa (−${PENALIDAD_TRAMPA} puntos).` : `${nombreDe(s.anfitrion)} decide después del debate.`}</div>` : ""}
     ${soyAnfitrion() ? `<div style="margin-top:22px" class="fila">
-        ${ultimo ? "" : `<button class="btn blanco" id="b-ver" ${pendientes ? "disabled" : ""}>Saltar a puntajes</button>`}
-        <button class="btn coral crece" id="b-sig" ${pendientes ? "disabled" : ""}>${ultimo ? "Ver puntajes de la categoría" : `Siguiente: ${nombreDe(orden[turno + 1])}`}</button>
+        ${ultimo ? "" : `<button class="btn blanco" id="b-ver">Saltar a puntajes</button>`}
+        <button class="btn coral crece" id="b-sig">${ultimo ? "Ver puntajes de la categoría" : `Siguiente: ${nombreDe(orden[turno + 1])}`}</button>
       </div>` : `<p class="muted" style="margin-top:20px">${nombreDe(s.anfitrion)} pasa al siguiente jugador.</p>`}`;
 }
 
@@ -727,10 +724,6 @@ function bindRevision() {
     set(salaRef(`${base}/${b.dataset.elegir}`), { u: lector, i: +b.dataset.para }).catch((e) => alert(e.message));
   });
   document.querySelectorAll("[data-quitar]").forEach((b) => b.onclick = () => remove(salaRef(`${base}/${b.dataset.quitar}`)));
-  document.querySelectorAll("[data-objetar]").forEach((b) => b.onclick = () =>
-    set(salaRef(`cats/${i}/objeciones/${b.dataset.objetar}/${S.uid}`), true).catch((e) => alert(e.message)));
-  document.querySelectorAll("[data-resolver]").forEach((b) => b.onclick = () =>
-    set(salaRef(`cats/${i}/resoluciones/${b.dataset.resolver}`), b.dataset.v));
   const sig = document.getElementById("b-sig");
   if (sig) sig.onclick = () => {
     if ((s.revisionTurno || 0) >= orden.length - 1) update(salaRef(), { estado: "tabla" });
@@ -754,13 +747,21 @@ function pantallaTabla() {
   if (!S.resp[s.catIndex]) return `${barraSala({ marcador: false })}<p class="muted">Cargando…</p>`;
   const { orden, porCat, tot } = puntajes(s);
   const calc = porCat[s.catIndex];
+  const cat = datosCat(s.catIndex);
+  const objeciones = cat.objeciones || {};
+  const pendientes = objecionesPendientes(cat).length;
   const finRonda = s.catIndex % CATS_POR_RONDA === CATS_POR_RONDA - 1;
   const ultima = s.catIndex >= TOTAL_CATS - 1;
   const ronda = Math.floor(s.catIndex / CATS_POR_RONDA);
   const hojas = orden.map((u) => `
     <div class="hoja ${u === S.uid ? "yo" : ""}">
       <header><span>${nombreDe(u)}</span></header>
-      <ol>${calc[u].palabras.map((p) => `<li class="${p.estado === "novale" || p.estado === "trampa" ? "anulada" : ""}"><span>${esc(p.texto) || '<span class="muted">—</span>'}${p.estado === "trampa" ? " 🚨" : p.estado === "novale" ? " ❌" : ""}</span><b class="${p.puntos ? "" : "p0"}">${p.puntos}</b></li>`).join("")}
+      <ol>${calc[u].palabras.map((p, i) => {
+        const k = `${u}_${i}`;
+        const objetable = p.texto && (p.puntos || p.estado || objeciones[k]);
+        const sera = objetable ? accionesObjecion(k, u, p.estado, Object.keys(objeciones[k] || {})) : "";
+        return `<li class="${p.estado === "novale" || p.estado === "trampa" ? "anulada" : ""}"><span>${esc(p.texto) || '<span class="muted">—</span>'}${cat.vinculos?.[u]?.[i] ? ' <span title="Dijo &quot;lo mismo digo&quot;">💬</span>' : ""}${p.estado === "trampa" ? " 🚨" : p.estado === "novale" ? " ❌" : ""}${sera}</span><b class="${p.puntos ? "" : "p0"}">${p.puntos}</b></li>`;
+      }).join("")}
         ${calc[u].trampas ? `<li class="penal"><span>🚨 Trampa</span><b>−${calc[u].trampas * PENALIDAD_TRAMPA}</b></li>` : ""}</ol>
       <footer><span>Total categoría</span><span>${calc[u].total}</span></footer>
     </div>`).join("");
@@ -775,12 +776,14 @@ function pantallaTabla() {
   let boton = "";
   if (soyAnfitrion()) {
     const txt = ultima ? "Ver resultado final 🏆" : finRonda ? `Empezar ronda ${ronda + 2}` : "Siguiente categoría";
-    boton = `<button class="btn coral full" id="b-avanzar">${txt}</button>`;
+    boton = `<button class="btn coral full" id="b-avanzar" ${pendientes ? "disabled" : ""}>${txt}</button>`;
   } else boton = `<p class="muted">${nombreDe(s.anfitrion)} avanza cuando estén todos.</p>`;
 
   return `${barraSala({ marcador: false })}
     <h2>${esc(s.cats?.[s.catIndex]?.tema)}</h2>
+    <p class="muted">¿Algo no cierra? Tocá "¿Será?" en la palabra y lo debaten. ${soyAnfitrion() ? `Vos decidís: ✅ vale, ❌ no vale o 🚨 trampa (−${PENALIDAD_TRAMPA} puntos).` : `Decide ${nombreDe(s.anfitrion)}.`}</p>
     <div class="grilla">${hojas}</div>
+    ${pendientes ? `<div class="error" style="margin-top:16px">🤨 Hay ${pendientes} "¿será?" sin resolver. ${soyAnfitrion() ? "Resolvelos para seguir." : `${nombreDe(s.anfitrion)} decide después del debate.`}</div>` : ""}
     ${subtotal}
     <div class="card"><h3>Puntaje acumulado</h3>${tablaRanking(orden, tot, true)}</div>
     ${boton}`;
@@ -809,6 +812,11 @@ async function guardarHistorial() {
 }
 
 function bindTabla() {
+  const i = S.sala.catIndex;
+  document.querySelectorAll("[data-objetar]").forEach((b) => b.onclick = () =>
+    set(salaRef(`cats/${i}/objeciones/${b.dataset.objetar}/${S.uid}`), true).catch((e) => alert(e.message)));
+  document.querySelectorAll("[data-resolver]").forEach((b) => b.onclick = () =>
+    set(salaRef(`cats/${i}/resoluciones/${b.dataset.resolver}`), b.dataset.v));
   const b = document.getElementById("b-avanzar");
   if (!b) return;
   b.onclick = async () => {
